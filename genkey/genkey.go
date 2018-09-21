@@ -10,7 +10,7 @@ import (
 	"golang.org/x/crypto/nacl/box"
 )
 
-// zero reader for debugging
+// zero and ones reader for debugging
 var zero = bytes.NewBuffer(make([]byte, 128))
 
 // exit with error when err is not nil
@@ -31,27 +31,27 @@ func printx(data []byte) {
 
 func main() {
 
-	pubA, secA, err := box.GenerateKey(rand.Reader)
+	senderPub, senderSec, err := box.GenerateKey(rand.Reader)
 	fatal(err)
 
-	fmt.Println("\npeer A")
-	printx(secA[:])
-	printx(pubA[:])
+	fmt.Println("sender")
+	print64(senderSec[:])
+	print64(senderPub[:])
 
-	pubB, secB, err := box.GenerateKey(rand.Reader)
+	receiverPub, receiverSec, err := box.GenerateKey(zero)
 	fatal(err)
 
-	fmt.Println("\npeer B")
-	printx(secB[:])
-	printx(pubB[:])
+	fmt.Println("receiver")
+	print64(receiverSec[:])
+	print64(receiverPub[:])
 
 	fmt.Println("\nshared keys")
 
 	var shared [32]byte
-	box.Precompute(&shared, pubB, secA)
-	printx(shared[:])
+	box.Precompute(&shared, receiverPub, senderSec)
+	print64(shared[:])
 
-	box.Precompute(&shared, pubA, secB)
-	printx(shared[:])
+	box.Precompute(&shared, senderPub, receiverSec)
+	print64(shared[:])
 
 }
