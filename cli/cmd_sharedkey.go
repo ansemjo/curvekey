@@ -19,10 +19,11 @@ func init() {
 }
 
 var sharedkeyCommand = &cobra.Command{
-	Use:   "dh",
-	Short: "Agree on a shared key with a peer.",
+	Use:     "shared",
+	Aliases: []string{"dh"},
+	Short:   "Agree on a shared key with a peer.",
 	Long: `Read the peer's public key (and your own secret key) and agree on a shared
-secret by essentially performing elliptic-curve diffie-hellmann.
+secret by essentially performing elliptic-curve Diffie-Hellmann on Curve25519.
 
 If your secret is not given, an ephemeral key is created and you'll need to
 transmit the displayed public key to your peer. This is then a trapdoor, as you
