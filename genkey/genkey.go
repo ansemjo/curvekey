@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 
-	"golang.org/x/crypto/ed25519"
 	"golang.org/x/crypto/nacl/box"
 )
 
@@ -32,30 +31,27 @@ func printx(data []byte) {
 
 func main() {
 
-	pubA, secA, err := ed25519.GenerateKey(zero)
+	pubA, secA, err := box.GenerateKey(rand.Reader)
 	fatal(err)
-	secA = secA[:32]
 
 	fmt.Println("\npeer A")
-	printx(secA)
-	printx(pubA)
+	printx(secA[:])
+	printx(pubA[:])
 
-	pubB, secB, err := ed25519.GenerateKey(rand.Reader)
+	pubB, secB, err := box.GenerateKey(rand.Reader)
 	fatal(err)
-	secB = secB[:32]
 
 	fmt.Println("\npeer B")
-	printx(secB)
-	printx(pubB)
-
-	var sharedA [32]byte
-	box.Precompute(sharedA, pubB, secA)
-
-	var sharedB [32]byte
-	box.Precompute(sharedB, pubA, secB)
+	printx(secB[:])
+	printx(pubB[:])
 
 	fmt.Println("\nshared keys")
-	printx(sharedA)
-	printx(sharedB)
+
+	var shared [32]byte
+	box.Precompute(&shared, pubB, secA)
+	printx(shared[:])
+
+	box.Precompute(&shared, pubA, secB)
+	printx(shared[:])
 
 }
