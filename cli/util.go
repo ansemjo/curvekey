@@ -29,18 +29,23 @@ func get32(slice []byte) *[32]byte {
 	return key
 }
 
-func readkey(file *os.File) *[32]byte {
-
-	key, err := ioutil.ReadAll(file)
-	fatal(err)
-
-	n, err := base64.StdEncoding.Decode(key, key)
-	fatal(err)
-
-	if n != 32 {
-		fatal(errors.New("key must be 32 bytes"))
+func decodeKey(b []byte) (key *[32]byte, err error) {
+	n, err := base64.StdEncoding.Decode(b, b)
+	if err != nil {
+		return
 	}
+	if n != 32 {
+		err = errors.New("key must be 32 bytes")
+		return
+	}
+	key = get32(b)
+	return
+}
 
-	return get32(key)
-
+func decodeKeyFile(file *os.File) (key *[32]byte, err error) {
+	keyslice, err := ioutil.ReadAll(file)
+	if err != nil {
+		return
+	}
+	return decodeKey(keyslice)
 }

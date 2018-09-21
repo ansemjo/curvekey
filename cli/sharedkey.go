@@ -8,27 +8,29 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
-	curvekey.AddCommand(sharedkeyCommand)
-	sharedkeyCommand.Flags().BytesBase64Var(&mysecret, "my", nil, "my secret key")
-}
+var peerkey **[32]byte
+var peerkeyCheck checkfunc
 
-var mysecret []byte
+func init() {
+	this := sharedkeyCommand
+	curvekey.AddCommand(this)
+
+	peerkey, peerkeyCheck = keyFlag(this, "peer", "p", "peer's public key", true)
+
+}
 
 var sharedkeyCommand = &cobra.Command{
 	Use:     "dh",
 	Short:   "read peer's public key and output ephemeral shared key",
 	Example: "  cat peerkey | curvekey dh",
+	PreRunE: func(cmd *cobra.Command, args []string) (err error) {
+		return peerkeyCheck(cmd)
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 
-		peerkey := readkey(os.Stdin)
-		var secret, shared, public *[32]byte
+		fmt.Printf("%v: %v\n", peerkey, *peerkey)
 
-		if cmd.Flag("my").Changed && len(mysecret) == 32 {
-			secret = get32(mysecret)
-		}
-
-		shared, public = keymgr.SharedKey(peerkey, secret)
+		shared, public := keymgr.SharedKey(*peerkey, nil)
 
 		fmt.Fprint(os.Stderr, "shared secret : ")
 		fmt.Println(encode(shared[:]))
