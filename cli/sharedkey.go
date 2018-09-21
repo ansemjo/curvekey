@@ -22,19 +22,20 @@ var sharedkeyCommand = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		peerkey := readkey(os.Stdin)
-		var shared, public *[32]byte
+		var secret, shared, public *[32]byte
 
 		if cmd.Flag("my").Changed && len(mysecret) == 32 {
-			secret := get32(mysecret)
-			public = keymgr.Pubkey(secret)
-			shared = keymgr.SharedKey(peerkey, secret)
-		} else {
-			shared, public = keymgr.EphemeralSharedKey(peerkey)
+			secret = get32(mysecret)
+		}
+
+		shared, public = keymgr.SharedKey(peerkey, secret)
+
+		fmt.Fprint(os.Stderr, "shared secret : ")
+		fmt.Println(encode(shared[:]))
+		if public != nil {
 			fmt.Fprint(os.Stderr, "ephemeral pub : ")
 			fmt.Println(encode(public[:]))
 		}
-		fmt.Fprint(os.Stderr, "shared secret : ")
-		fmt.Println(encode(shared[:]))
 
 	},
 }
