@@ -2,10 +2,10 @@ package cli
 
 import (
 	"encoding/base64"
-	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
+
+	"github.com/spf13/cobra"
 )
 
 func encode(b []byte) string {
@@ -29,23 +29,13 @@ func get32(slice []byte) *[32]byte {
 	return key
 }
 
-func decodeKey(b []byte) (key *[32]byte, err error) {
-	n, err := base64.StdEncoding.Decode(b, b)
-	if err != nil {
-		return
+// run pre-run checks of cobra flags
+func checkAll(cmd *cobra.Command, checker ...func(*cobra.Command) error) (err error) {
+	for _, ch := range checker {
+		err = ch(cmd)
+		if err != nil {
+			return
+		}
 	}
-	if n != 32 {
-		err = errors.New("key must be 32 bytes")
-		return
-	}
-	key = get32(b)
 	return
-}
-
-func decodeKeyFile(file *os.File) (key *[32]byte, err error) {
-	keyslice, err := ioutil.ReadAll(file)
-	if err != nil {
-		return
-	}
-	return decodeKey(keyslice)
 }
