@@ -10,10 +10,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type Key32 *[32]byte
 type CmdCheckFunc func(cmd *cobra.Command) error
 type Key32Flag struct {
-	Key   *Key32
+	Key   **[32]byte
 	Check CmdCheckFunc
 }
 
@@ -23,7 +22,7 @@ func AddKey32Flag(cmd *cobra.Command, flag, shortflag, usage string, stdin bool)
 
 	// add flag to command
 	str := cmd.Flags().StringP(flag, shortflag, "", usage)
-	var key Key32
+	var key *[32]byte
 
 	// return struct and build check function inline
 	return Key32Flag{&key, func(cmd *cobra.Command) (err error) {
@@ -32,7 +31,7 @@ func AddKey32Flag(cmd *cobra.Command, flag, shortflag, usage string, stdin bool)
 		if cmd.Flag(flag).Changed {
 
 			// and it is a valid base64 encoded key
-			if Is32ByteBase64Encoded(*str) {
+			if is32ByteBase64Encoded(*str) {
 				key, err = decodeKey([]byte(*str))
 
 			} else {
@@ -55,8 +54,8 @@ func AddKey32Flag(cmd *cobra.Command, flag, shortflag, usage string, stdin bool)
 	}}
 }
 
-// Is32ByteBase64Encoded checks if the given string is a base64-encoded 32 byte value.
-func Is32ByteBase64Encoded(str string) bool {
+// is32ByteBase64Encoded checks if the given string is a base64-encoded 32 byte value.
+func is32ByteBase64Encoded(str string) bool {
 	return regexp.MustCompile("^[A-Za-z0-9+/]{43}=$").MatchString(str)
 }
 

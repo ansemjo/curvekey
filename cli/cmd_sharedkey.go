@@ -13,7 +13,6 @@ var peerkey, mykey Key32Flag
 func init() {
 	this := sharedkeyCommand
 	curvekey.AddCommand(this)
-
 	peerkey = AddKey32Flag(this, "peer", "p", "peer's public key (default: stdin)", true)
 	mykey = AddKey32Flag(this, "key", "k", "your secret key", false)
 }

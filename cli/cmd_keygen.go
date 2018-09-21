@@ -12,8 +12,11 @@ func init() {
 }
 
 var newkeyCommand = &cobra.Command{
-	Use:   "kg",
-	Short: "generate a new secret key",
+	Use:     "keygen",
+	Aliases: []string{"kg", "new"},
+	Short:   "Generate a new secret key.",
+	Long:    `Generate a new secret key from system randomness.`,
+	Example: "  curvekey new > key.sec\n  curvekey pub -k key.sec > key.pub",
 	Run: func(cmd *cobra.Command, args []string) {
 
 		key := keymgr.NewKey()
