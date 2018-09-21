@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"log"
 
 	"golang.org/x/crypto/nacl/box"
@@ -29,29 +30,63 @@ func printx(data []byte) {
 	fmt.Printf("%#x\n", data)
 }
 
+type keyPair struct {
+	Public *[32]byte
+	Secret *[32]byte
+}
+
+func newKeyPair(reader io.Reader) *keyPair {
+	pub, sec, err := box.GenerateKey(reader)
+	if err != nil {
+		panic(err)
+	}
+	return &keyPair{pub, sec}
+}
+
+func (k *keyPair) print() {
+	print64(k.Secret[:])
+	print64(k.Public[:])
+}
+
+func shred(b *[32]byte) {
+	_, err := rand.Read(b[:])
+	if err != nil {
+		panic(err)
+	}
+	b = nil
+}
+
+type ephemeralKey struct {
+	Public *[32]byte
+	Shared *[32]byte
+}
+
+func newEphemeralKey(pub *[32]byte) *ephemeralKey {
+	sender := newKeyPair(rand.Reader)
+	shared := new([32]byte)
+	eph := &ephemeralKey{Public: sender.Public, Shared: shared}
+	box.Precompute(eph.Shared, pub, sender.Secret)
+	shred(sender.Secret)
+	return eph
+}
+
+func (e *ephemeralKey) print() {
+	print64(e.Shared[:])
+}
+
 func main() {
 
-	senderPub, senderSec, err := box.GenerateKey(rand.Reader)
-	fatal(err)
-
-	fmt.Println("sender")
-	print64(senderSec[:])
-	print64(senderPub[:])
-
-	receiverPub, receiverSec, err := box.GenerateKey(zero)
-	fatal(err)
-
 	fmt.Println("receiver")
-	print64(receiverSec[:])
-	print64(receiverPub[:])
+	receiver := newKeyPair(zero)
+	receiver.print()
 
-	fmt.Println("\nshared keys")
+	fmt.Println("\nephemeral key")
+	ephem := newEphemeralKey(receiver.Public)
+	ephem.print()
 
+	fmt.Println("\nshared key from receiver secret")
 	var shared [32]byte
-	box.Precompute(&shared, receiverPub, senderSec)
-	print64(shared[:])
-
-	box.Precompute(&shared, senderPub, receiverSec)
+	box.Precompute(&shared, ephem.Public, receiver.Secret)
 	print64(shared[:])
 
 }
