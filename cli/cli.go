@@ -16,9 +16,10 @@ func init() {
 var curvekey = &cobra.Command{
 	Use:     "curvekey",
 	Long:    "Elliptic curve operations on Curve25519.",
-	Version: "0.0.1",
+	Version: "0.0.2",
 }
 
+// Execute executes the cobra cli
 func Execute() {
 	err := curvekey.Execute()
 	if err != nil {
