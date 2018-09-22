@@ -2,11 +2,11 @@
 .PHONY : build clean mkrelease-prepare mkrelease mkrelease-finish release
 
 GOFILES := $(shell find -type f -name '*.go') go.mod go.sum
-GOFLAGS = -ldflags="-s -w"
+GOFLAGS = -ldflags="-s -w -extldflags '-static'"
 
 # build static binary w/o debugging symbols
 build : $(GOFILES)
-	go build $(GOFLAGS)
+	CGO_ENABLED=0 go build $(GOFLAGS)
 	command -v upx >/dev/null && upx curvekey
 
 # clean anything not tracked by git
@@ -25,7 +25,7 @@ mkrelease-prepare:
 
 EXT := $(if $(findstring windows,$(OS)),.exe)
 mkrelease: $(GOFILES)
-	GOOS=$(OS) GOARCH=$(ARCH) go build $(GOFLAGS) -o $(RELEASEDIR)/curvekey-$(OS)-$(ARCH)$(EXT)
+	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build $(GOFLAGS) -o $(RELEASEDIR)/curvekey-$(OS)-$(ARCH)$(EXT)
 
 mkrelease-finish:
 	upx $(RELEASEDIR)/* || true
