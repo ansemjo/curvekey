@@ -11,6 +11,7 @@ import (
 )
 
 type CmdCheckFunc func(cmd *cobra.Command) error
+
 type Key32Flag struct {
 	Key   **[32]byte
 	Check CmdCheckFunc
