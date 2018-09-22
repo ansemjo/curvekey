@@ -52,12 +52,12 @@ file aswell. Otherwise only the secret key will be written.`,
 		defer kgout.File.Close()
 
 		key := keymgr.NewKey()
-		fmt.Fprintln(kgout.File, encode(key[:]))
+		fmt.Fprintln(kgout.File, encode(key))
 
 		if pubout.File != nil {
 			defer pubout.File.Close()
 			pub := keymgr.Pubkey(key)
-			fmt.Fprintln(pubout.File, encode(pub[:]))
+			fmt.Fprintln(pubout.File, encode(pub))
 		}
 
 	},

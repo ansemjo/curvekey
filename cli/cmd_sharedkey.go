@@ -57,14 +57,14 @@ have no way to recalculate the shared secret without the peer's private key.`,
 			fmt.Fprint(os.Stderr, "shared secret:\n  ")
 		}
 		defer sharedkey.File.Close()
-		fmt.Fprintln(sharedkey.File, encode(shared[:]))
+		fmt.Fprintln(sharedkey.File, encode(shared))
 
 		if public != nil {
 			if ephemeralpub.File == nil {
 				ephemeralpub.File = os.Stdout
 				fmt.Fprint(os.Stderr, "ephemeral public key:\n  ")
 			}
-			fmt.Fprintln(ephemeralpub.File, encode(public[:]))
+			fmt.Fprintln(ephemeralpub.File, encode(public))
 		}
 
 	},
