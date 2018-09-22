@@ -1,5 +1,5 @@
 # targets that are not actual files
-.PHONY : build clean mkrelease-prepare mkrelease mkrelease-finish release
+.PHONY : build clean mkrelease-prepare mkrelease mkrelease-finish release upload
 
 GOFILES := $(shell find -type f -name '*.go') go.mod go.sum
 GOFLAGS = -ldflags="-s -w -extldflags '-static'"
@@ -34,3 +34,6 @@ mkrelease-finish:
 
 release:
 	git archive --prefix=./ HEAD | mkr rl
+
+upload:
+	ghr -r curvekey -replace $$(git describe --tags --abbrev=0) release/
