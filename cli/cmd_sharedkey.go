@@ -51,6 +51,9 @@ have no way to recalculate the shared secret without the peer's private key.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		shared, public := keymgr.SharedKey(peerkey.Key, mykey.Key)
+		if mykey.Key != nil {
+			keymgr.Shred(mykey.Key)
+		}
 
 		if sharedkey.File == nil {
 			sharedkey.File = os.Stdout
@@ -58,6 +61,7 @@ have no way to recalculate the shared secret without the peer's private key.`,
 		}
 		defer sharedkey.File.Close()
 		fmt.Fprintln(sharedkey.File, encode(shared))
+		keymgr.Shred(shared)
 
 		if public != nil {
 			if ephemeralpub.File == nil {

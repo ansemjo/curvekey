@@ -60,5 +60,7 @@ file aswell. Otherwise only the secret key will be written.`,
 			fmt.Fprintln(pubout.File, encode(pub))
 		}
 
+		keymgr.Shred(key)
+
 	},
 }

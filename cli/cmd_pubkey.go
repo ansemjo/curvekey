@@ -45,6 +45,7 @@ calculate the public key.`,
 		defer pkout.File.Close()
 
 		pub := keymgr.Pubkey(secret.Key)
+		keymgr.Shred(secret.Key)
 		fmt.Fprintln(pkout.File, encode(pub))
 
 	},
