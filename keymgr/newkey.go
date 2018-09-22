@@ -5,6 +5,7 @@ import (
 	"io"
 )
 
+// NewKey generates a new random 32 byte key
 func NewKey() *[32]byte {
 	key := new([32]byte)
 	_, err := io.ReadFull(rand.Reader, key[:])
