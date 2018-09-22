@@ -1,3 +1,4 @@
 *.pub
 *.sec
 /curvekey
+/release/
