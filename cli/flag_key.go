@@ -13,27 +13,34 @@ import (
 type CmdCheckFunc func(cmd *cobra.Command) error
 
 type Key32Flag struct {
-	Key   **[32]byte
+	Key   *[32]byte
 	Check CmdCheckFunc
+}
+
+type Key32FlagOptions struct {
+	Flag         string
+	Short        string
+	Usage        string
+	DefaultStdin bool
 }
 
 // AddKey32Flag adds a flag to a command, which can either be a valid base64
 // string or a filename for a 32 byte key. Optionally reads from stdin.
-func AddKey32Flag(cmd *cobra.Command, flag, shortflag, usage string, stdin bool) Key32Flag {
+func AddKey32Flag(cmd *cobra.Command, opts Key32FlagOptions) *Key32Flag {
 
 	// add flag to command
-	str := cmd.Flags().StringP(flag, shortflag, "", usage)
-	var key *[32]byte
+	str := cmd.Flags().StringP(opts.Flag, opts.Short, "", opts.Usage)
+	key := &Key32Flag{}
 
 	// return struct and build check function inline
-	return Key32Flag{&key, func(cmd *cobra.Command) (err error) {
+	key.Check = func(cmd *cobra.Command) (err error) {
 
 		// if flag was given
-		if cmd.Flag(flag).Changed {
+		if cmd.Flag(opts.Flag).Changed {
 
 			// and it is a valid base64 encoded key
 			if is32ByteBase64Encoded(*str) {
-				key, err = decodeKey([]byte(*str))
+				key.Key, err = decodeKey([]byte(*str))
 
 			} else {
 				// assume any other string to be a filename
@@ -42,17 +49,18 @@ func AddKey32Flag(cmd *cobra.Command, flag, shortflag, usage string, stdin bool)
 					return err
 				}
 				defer file.Close()
-				key, err = decodeKeyFile(file)
+				key.Key, err = decodeKeyFile(file)
 			}
 
-		} else if stdin {
+		} else if opts.DefaultStdin {
 			// if flag was not given but "read from stdin" is true
-			key, err = decodeKeyFile(os.Stdin)
+			key.Key, err = decodeKeyFile(os.Stdin)
 		}
 
 		// if neither, just return nil. the pointer to Key will remain nil!
 		return
-	}}
+	}
+	return key
 }
 
 // is32ByteBase64Encoded checks if the given string is a base64-encoded 32 byte value.

@@ -7,12 +7,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var secret Key32Flag
+var secret *Key32Flag
 
 func init() {
 	this := pubkeyCommand
 	curvekey.AddCommand(this)
-	secret = AddKey32Flag(this, "key", "k", "secret key (default: stdin)", true)
+	secret = AddKey32Flag(this, Key32FlagOptions{"key", "k", "secret key (default: stdin)", true})
 }
 
 var pubkeyCommand = &cobra.Command{
@@ -27,7 +27,7 @@ calculate the public key and output that on stdout.`,
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 
-		pub := keymgr.Pubkey(*secret.Key)
+		pub := keymgr.Pubkey(secret.Key)
 		fmt.Println(encode(pub[:]))
 
 	},

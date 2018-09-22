@@ -8,13 +8,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var peerkey, mykey Key32Flag
+var peerkey, mykey *Key32Flag
 
 func init() {
 	this := sharedkeyCommand
 	curvekey.AddCommand(this)
-	peerkey = AddKey32Flag(this, "peer", "p", "peer's public key (default: stdin)", true)
-	mykey = AddKey32Flag(this, "key", "k", "your secret key", false)
+	peerkey = AddKey32Flag(this, Key32FlagOptions{"peer", "p", "peer's public key (default: stdin)", true})
+	mykey = AddKey32Flag(this, Key32FlagOptions{"key", "k", "your secret key", false})
 }
 
 var sharedkeyCommand = &cobra.Command{
@@ -32,7 +32,7 @@ have no way to recalculate the shared secret without the peer's private key.`,
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 
-		shared, public := keymgr.SharedKey(*peerkey.Key, *mykey.Key)
+		shared, public := keymgr.SharedKey(peerkey.Key, mykey.Key)
 
 		fmt.Fprint(os.Stderr, "shared secret:\n  ")
 		fmt.Println(encode(shared[:]))
