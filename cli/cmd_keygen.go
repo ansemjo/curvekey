@@ -8,22 +8,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var out *FileFlag
+var kgout *FileFlag
 var pubout *FileFlag
 
 func init() {
 	this := newkeyCommand
 	curvekey.AddCommand(this)
+	this.Flags().SortFlags = false
 
-	out = AddFileFlag(this, FileFlagOptions{
-		Flag: "out", Short: "o", Usage: "output secret key to file (default: stdout)",
+	kgout = AddFileFlag(this, FileFlagOptions{
+		Flag: "key", Short: "k", Usage: "output secret key to file (default: stdout)",
 		Open: func(name string) (*os.File, error) {
 			return os.OpenFile(name, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0600)
 		},
 	})
 
 	pubout = AddFileFlag(this, FileFlagOptions{
-		Flag: "pubout", Short: "p", Usage: "output public key to file (default: none)",
+		Flag: "pub", Short: "p", Usage: "output public key to file (default: none)",
 		Open: func(name string) (*os.File, error) {
 			return os.Create(name)
 		},
@@ -35,20 +36,23 @@ var newkeyCommand = &cobra.Command{
 	Use:     "keygen",
 	Aliases: []string{"kg", "new"},
 	Short:   "Generate a new secret key.",
-	Long:    `Generate a new secret key from system randomness.`,
-	Example: "  curvekey new -o key.sec -p key.pub",
+	Long: `Generate a new secret key from system randomness.
+If the '--pub' flag is given, the public key is calculated and written to that
+file aswell. Otherwise only the secret key will be written.`,
+	Example: `  curvekey new -k key.sec
+  curvekey keygen -k key.sec -p key.pub`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		return checkAll(cmd, out.Check, pubout.Check)
+		return checkAll(cmd, kgout.Check, pubout.Check)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 
-		if out.File == nil {
-			out.File = os.Stdout
+		if kgout.File == nil {
+			kgout.File = os.Stdout
 		}
-		defer out.File.Close()
+		defer kgout.File.Close()
 
 		key := keymgr.NewKey()
-		fmt.Fprintln(out.File, encode(key[:]))
+		fmt.Fprintln(kgout.File, encode(key[:]))
 
 		if pubout.File != nil {
 			defer pubout.File.Close()
