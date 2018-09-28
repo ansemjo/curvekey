@@ -45,6 +45,13 @@ Consult the command help at any time:
     $ curvekey help shared
     ...
 
+# examples
+
+Other usage examples and scenarios can be found in [examples](examples/):
+
+- [password-based](examples/password-based-key-with-stdkdf.md) keys generated with
+  [ansemjo/stdkdf](https://github.com/ansemjo/stdkdf)
+
 # warning
 
 This is **unauthenticated** Diffie-Hellmann. You should
